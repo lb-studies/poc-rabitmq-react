@@ -1,10 +1,10 @@
 import amqp from "amqplib";
 
-const queue = "ranking";
+const queue = "livetimeq";
 
 (async () => {
   try {
-    const connection = await amqp.connect("amqp://user:password@localhost");
+    const connection = await amqp.connect("amqps://apewvoke:EVJl8ZV1Z2jEJeFYCwggKIentQBKCEsd@jackal.rmq.cloudamqp.com/apewvoke");
     const channel = await connection.createChannel();
 
     process.once("SIGINT", async () => {
@@ -12,22 +12,24 @@ const queue = "ranking";
       await connection.close();
     });
 
-    await channel.assertQueue(queue, { durable: false });
+    await channel.assertQueue(queue, { durable: true });
+
+    console.log(` [*] Waiting for messages in queue '${queue}'. To exit press CTRL+C`);
+
     await channel.consume(
       queue,
       (message) => {
         if (message) {
           console.log(
             " [x] Received '%s'",
-            JSON.parse(message.content.toString())
+            message.content.toString()
           );
         }
       },
       { noAck: true }
     );
 
-    console.log(" [*] Waiting for messages. To exit press CTRL+C");
   } catch (err) {
-    console.warn(err);
+    console.error("Error:", err);
   }
 })();

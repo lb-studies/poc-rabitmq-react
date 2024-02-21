@@ -1,19 +1,19 @@
 import amqp from "amqplib";
 
-const queue = "ranking";
+const queue = "livetimeq";
 const text = {
   item_id: "id",
-  pilot_name: "Davi Sermarine",
-  time: "27.8"
+  pilot_name: "teste",
+  time: "5.0"
 };
 
 (async () => {
   let connection;
   try {
-    connection = await amqp.connect("amqp://user:password@localhost");
+    connection = await amqp.connect("amqps://apewvoke:EVJl8ZV1Z2jEJeFYCwggKIentQBKCEsd@jackal.rmq.cloudamqp.com/apewvoke");
     const channel = await connection.createChannel();
 
-    await channel.assertQueue(queue, { durable: false });
+    await channel.assertQueue(queue, { durable: true });
     channel.sendToQueue(queue, Buffer.from(JSON.stringify(text)));
     console.log(" [x] Sent '%s'", text);
     await channel.close();
