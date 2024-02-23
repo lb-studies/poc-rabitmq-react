@@ -4,7 +4,7 @@ const queue = "livetimeq";
 
 (async () => {
   try {
-    const connection = await amqp.connect("amqps://apewvoke:EVJl8ZV1Z2jEJeFYCwggKIentQBKCEsd@jackal.rmq.cloudamqp.com/apewvoke");
+    const connection = await amqp.connect("amqps://lhpxxbug:KGhPBF5GEoFz0W0igq_iYegvyakjUYj8@jackal.rmq.cloudamqp.com/lhpxxbug");
     const channel = await connection.createChannel();
 
     process.once("SIGINT", async () => {
