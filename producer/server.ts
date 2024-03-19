@@ -1,4 +1,6 @@
-import amqp, { Connection } from "amqplib";
+import amqp from "amqplib";
+import fs from "fs";
+import path from "path";
 import 'dotenv/config';
 
 const queue = "livetimeq";
@@ -13,12 +15,12 @@ function generateRandomName(): string {
   const randomChar = () => String.fromCharCode(Math.floor(Math.random() * 26) + 97);
 
   const randomWord = () => {
-      const length = Math.floor(Math.random() * 10) + 1;
-      let word = capitalize(randomChar());
-      for (let i = 1; i < length; i++) {
-          word += randomChar();
-      }
-      return word;
+    const length = Math.floor(Math.random() * 10) + 1;
+    let word = capitalize(randomChar());
+    for (let i = 1; i < length; i++) {
+      word += randomChar();
+    }
+    return word;
   };
 
   return `${randomWord()} ${randomWord()}`;
@@ -32,25 +34,28 @@ function generateRandomName(): string {
     const channel = await connection.createChannel();
 
     await channel.assertQueue(queue, { durable: true });
-    
+
+    const xmlDir = path.join(__dirname, 'xml');
+    const xmlFiles = fs.readdirSync(xmlDir).sort();
+
+    let fileIndex = 0;
     const interval = setInterval(async () => {
-      const text = {
-        item_id: `text.item_id - ${generateRandomName()}`,
-        pilot_name: `text.pilot_name - ${generateRandomName()}`,
-        time: `text.time - ${incrementCounter()}`
-      };
+      const fileName = xmlFiles[fileIndex];
+      const filePath = path.join(xmlDir, fileName);
+      const text = fs.readFileSync(filePath, 'utf-8');
 
       channel.sendToQueue(queue, Buffer.from(JSON.stringify(text)));
 
       console.log(" [x] Sent '%s'", text);
-    }, 1000);
-    
-    await new Promise(resolve => setTimeout(resolve, 10000));
-    
-    
+
+      fileIndex = (fileIndex + 1) % xmlFiles.length;
+    }, 3000);
+
+    await new Promise(resolve => setTimeout(resolve, 1000000));
+
     clearInterval(interval);
     await channel.close();
-    
+
   } catch (err) {
     console.warn(err);
   } finally {
